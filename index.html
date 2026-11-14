@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeck.studioAI — Studio Video & Gambar AI (Seedance 2.5)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        obsidian: '#06070a',
+                        surface: '#0d0f15',
+                        surfaceElevated: '#131620',
+                        accentIndigo: '#6366f1',
+                        accentCyan: '#06b6d4',
+                        accentViolet: '#8b5cf6',
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        :root {
+            color-scheme: dark;
+        }
+
+        body {
+            background-color: #06070a;
+            color: #f4f4f5;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse 75% 45% at 15% -5%, rgba(99, 102, 241, 0.12), transparent 60%),
+                radial-gradient(ellipse 65% 40% at 88% 0%, rgba(6, 182, 212, 0.10), transparent 55%);
+        }
+
+        /* Glassmorphic Studio Surfaces */
+        .studio-navbar {
+            background: rgba(6, 7, 10, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .studio-panel {
+            background: rgba(13, 15, 21, 0.88);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.7);
+        }
+
+        .studio-subcard {
+            background: rgba(19, 22, 32, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        /* Segmented Pill Controls */
+        .pill-group {
+            background: #090b10;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .pill-item {
+            color: #a1a1aa;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .pill-item:hover:not(.pill-active) {
+            color: #f4f4f5;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .pill-active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.24), rgba(6, 182, 212, 0.18));
+            border-color: rgba(99, 102, 241, 0.55) !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 12px -2px rgba(99, 102, 241, 0.32);
+        }
+
+        /* Primary CTA Gradient Button */
+        .cta-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #3b82f6 48%, #06b6d4 100%);
+            box-shadow: 0 8px 28px -6px rgba(99, 102, 241, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .cta-gradient:hover:not(:disabled) {
+            filter: brightness(1.08);
+            box-shadow: 0 12px 34px -4px rgba(6, 182, 212, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            transform: translateY(-1px);
+        }
+
+        .cta-gradient:active:not(:disabled) {
+            transform: translateY(0px);
+        }
+
+        /* Custom Range Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.12);
+            height: 5px;
+            border-radius: 999px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            cursor: pointer;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
+        }
+
+        /* Subtle Stage Grid Pattern */
+        .stage-grid-bg {
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.14);
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.24);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-accentIndigo selection:text-white">
+
+    <!-- ==================== 1. HEADER BAR ==================== -->
+    <header class="sticky top-0 z-40 studio-navbar">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 h-auto py-2.5 md:py-0 md:h-16 flex flex-wrap md:flex-nowrap items-center justify-between gap-2.5">
+            
+            <!-- Left: Brand Logo & Title + Seedance 2.5 Badge -->
+            <div class="flex items-center gap-2.5 shrink-0">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accentIndigo via-blue-500 to-accentCyan flex items-center justify-center shadow-md shadow-accentIndigo/30">
+                    <i class="fa-solid fa-sparkles text-white text-xs"></i>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="font-extrabold text-base sm:text-lg tracking-tight text-white">
+                        Jeck<span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">.studioAI</span>
+                    </span>
+                    <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white/[0.06] text-cyan-300 border border-white/10 tracking-wide">
+                        Seedance 2.5
+                    </span>
+                </div>
+            </div>
+
+            <!-- Right: Credit Pill + Top Up + Bagikan Button -->
+            <div class="flex items-center gap-2 md:order-3 shrink-0">
+                <!-- Credit Balance Pill -->
+                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-xs">
+                    <i class="fa-solid fa-coins text-amber-400 text-[11px]"></i>
+                    <span id="header-credit-count" class="font-mono font-bold text-white">1</span>
+                    <span class="text-zinc-400 font-medium">Kredit</span>
+                </div>
+
+                <!-- + Top Up Button -->
+                <button type="button" onclick="openTopupModal()" class="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-400/40 text-amber-300 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>Top Up</span>
+                </button>
+
+                <!-- Bagikan Button -->
+                <button type="button" onclick="shareWebsiteUrl()" class="px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer" title="Bagikan Link">
+                    <i class="fa-solid fa-share-nodes text-[11px] text-cyan-400"></i>
+                    <span class="hidden sm:inline">Bagikan</span>
+                </button>
+            </div>
+
+            <!-- Center Navigation Tabs -->
+            <nav class="w-full md:w-auto md:order-2 flex items-center justify-center">
+                <div class="pill-group p-1 rounded-full flex items-center gap-1 w-full md:w-auto">
+                    <button type="button" onclick="switchMainTab('video')" id="nav-tab-video" class="pill-item pill-active flex-1 md:flex-initial px-4 py-1.5 rounded-full text-xs font-semibold flex items-center justify-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-film text-[11px] text-cyan-400"></i>
+                        <span>Video Studio</span>
+                    </button>
+                    <button type="button" onclick="switchMainTab('image')" id="nav-tab-image" class="pill-item flex-1 md:flex-initial px-4 py-1.5 rounded-full text-xs font-semibold flex items-center justify-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[11px] text-indigo-400"></i>
+                        <span>Image Studio</span>
+                    </button>
+                    <button type="button" onclick="switchMainTab('gallery')" id="nav-tab-gallery" class="pill-item flex-1 md:flex-initial px-4 py-1.5 rounded-full text-xs font-semibold flex items-center justify-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-photo-film text-[11px] text-violet-400"></i>
+                        <span>Galeri Karya</span>
+                        <span id="nav-gallery-count" class="font-mono text-[10px] px-1.5 py-0.2 rounded-full bg-white/10 text-zinc-200">0</span>
+                    </button>
+                </div>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- ==================== 2. MAIN WORKSPACE ==================== -->
+    <main class="max-w-[1440px] mx-auto w-full px-4 sm:px-6 py-5 flex-grow">
+
+        <!-- ============================================================ -->
+        <!-- TAB 1: VIDEO STUDIO (2-COLUMN WORKSPACE)                     -->
+        <!-- ============================================================ -->
+        <section id="workspace-video" class="grid grid-cols-1 lg:grid-cols-[430px_1fr] gap-5 items-start">
+            
+            <!-- LEFT CONTROL PANEL -->
+            <div class="studio-panel rounded-2xl p-4 sm:p-5 space-y-5 lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto">
+                
+                <!-- 1. Mode Selector (EXACTLY 3 Buttons) -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Mode Generasi</span>
+                        <span class="text-[11px] font-mono text-cyan-400">Seedance 2.5</span>
+                    </div>
+                    <div class="pill-group p-1 rounded-xl grid grid-cols-3 gap-1">
+                        <button type="button" onclick="setVideoMode('text-to-video')" id="vmode-text-to-video" class="pill-item pill-active py-2 px-2 rounded-lg text-[11px] sm:text-xs font-semibold text-center leading-tight">
+                            Teks to Video
+                        </button>
+                        <button type="button" onclick="setVideoMode('image-to-video')" id="vmode-image-to-video" class="pill-item py-2 px-2 rounded-lg text-[11px] sm:text-xs font-semibold text-center leading-tight">
+                            Image to Video
+                        </button>
+                        <button type="button" onclick="setVideoMode('multi-referensi')" id="vmode-multi-referensi" class="pill-item py-2 px-2 rounded-lg text-[11px] sm:text-xs font-semibold text-center leading-tight">
+                            Multi Referensi
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2A. Single-Image Upload ("Image to Video") -->
+                <div id="panel-video-i2v" class="hidden space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-semibold text-zinc-200">Gambar Referensi Utama</label>
+                        <button type="button" id="btn-clear-v-i2v" onclick="clearVideoI2VImage()" class="hidden text-[11px] text-rose-400 hover:text-rose-300 font-medium cursor-pointer">
+                            Hapus
+                        </button>
+                    </div>
+
+                    <input type="file" id="input-video-i2v" accept="image/*" class="hidden" onchange="handleVideoI2VUpload(event)">
+
+                    <div id="dropzone-video-i2v" onclick="triggerVideoI2VInput()" class="studio-subcard rounded-xl border border-dashed border-white/15 hover:border-indigo-400/60 p-4 text-center cursor-pointer transition-all group">
+                        <div class="w-9 h-9 rounded-lg bg-white/[0.04] group-hover:bg-indigo-500/15 text-zinc-400 group-hover:text-indigo-400 flex items-center justify-center mx-auto mb-2 transition-colors">
+                            <i class="fa-regular fa-image text-base"></i>
+                        </div>
+                        <p class="text-xs font-semibold text-zinc-200">Unggah Gambar Awal / Frame Pertama</p>
+                        <p class="text-[11px] text-zinc-500 mt-0.5">Klik atau seret JPG, PNG, WEBP dari galeri</p>
+                    </div>
+
+                    <div id="preview-video-i2v" class="hidden studio-subcard rounded-xl p-2.5 flex items-center gap-3">
+                        <img id="thumb-video-i2v" src="" alt="Frame Pertama" class="w-14 h-14 rounded-lg object-cover border border-white/10 shrink-0">
+                        <div class="min-w-0 flex-1">
+                            <p id="name-video-i2v" class="text-xs font-semibold text-white truncate">frame-awal.jpg</p>
+                            <p class="text-[11px] text-emerald-400 mt-0.5 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check text-[10px]"></i> Siap diproses
+                            </p>
+                        </div>
+                        <button type="button" onclick="clearVideoI2VImage()" class="w-7 h-7 rounded-lg bg-white/[0.06] hover:bg-rose-500/20 text-zinc-400 hover:text-rose-400 flex items-center justify-center text-xs transition-colors cursor-pointer" title="Hapus gambar">
+                            ×
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2B. Multi-Reference Uploader up to 9 Images ("Multi Referensi") -->
+                <div id="panel-video-multiref" class="hidden space-y-2.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-zinc-200">Multi Referensi (Maks. 9 Gambar)</span>
+                            <span id="badge-v-multiref-count" class="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">0/9</span>
+                        </div>
+                        <button type="button" id="btn-clear-v-multiref" onclick="clearAllVideoMultiRef()" class="hidden text-[11px] text-rose-400 hover:text-rose-300 font-medium whitespace-nowrap cursor-pointer">
+                            Hapus Semua
+                        </button>
+                    </div>
+
+                    <input type="file" id="input-video-multiref" accept="image/*" multiple class="hidden" onchange="handleVideoMultiRefUpload(event)">
+
+                    <div id="grid-video-multiref" class="grid grid-cols-3 gap-2">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- 3. Prompt Textarea (20.000 Karakter) -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label for="prompt-video" class="text-xs font-semibold text-zinc-200">Prompt Video</label>
+                        <button type="button" onclick="clearVideoPrompt()" class="text-[11px] text-zinc-400 hover:text-white font-medium transition-colors cursor-pointer">
+                            Clear
+                        </button>
+                    </div>
+                    <div class="relative rounded-xl bg-[#090b10] border border-white/10 focus-within:border-indigo-500/60 transition-colors">
+                        <textarea id="prompt-video" rows="4" maxlength="20000" oninput="updateVideoPromptCounter()" placeholder="Deskripsikan adegan video, subjek, pencahayaan, dan suasana secara detail..." class="w-full bg-transparent px-3.5 pt-3 pb-7 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"></textarea>
+                        <div class="absolute bottom-2 right-3 text-[10px] font-mono text-zinc-500 pointer-events-none">
+                            <span id="counter-video-prompt">0</span> / 20.000 karakter
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Settings Grid (Durasi, Resolusi, Rasio Aspek) -->
+                <div class="space-y-4 pt-1 border-t border-white/[0.07]">
+                    
+                    <!-- Durasi: ONLY 15 Detik & 30 Detik -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-zinc-300">Durasi</span>
+                            <span class="text-[11px] font-mono text-zinc-500">15s / 30s</span>
+                        </div>
+                        <div class="pill-group p-1 rounded-xl grid grid-cols-2 gap-1">
+                            <button type="button" onclick="setVideoDuration(15)" id="vdur-15" class="pill-item pill-active py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5">
+                                <span>15 Detik</span>
+                            </button>
+                            <button type="button" onclick="setVideoDuration(30)" id="vdur-30" class="pill-item py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5">
+                                <span>30 Detik</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Resolusi & Rasio Aspek -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Resolusi -->
+                        <div class="space-y-2">
+                            <span class="block text-xs font-semibold text-zinc-300">Resolusi</span>
+                            <div class="pill-group p-1 rounded-xl grid grid-cols-2 gap-1">
+                                <button type="button" onclick="setVideoResolution('480p')" id="vres-480p" class="pill-item pill-active py-2 px-2 rounded-lg text-xs font-semibold text-center">
+                                    480p
+                                </button>
+                                <button type="button" onclick="setVideoResolution('720p')" id="vres-720p" class="pill-item py-2 px-2 rounded-lg text-xs font-semibold text-center">
+                                    720p
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Rasio Aspek -->
+                        <div class="space-y-2">
+                            <span class="block text-xs font-semibold text-zinc-300">Rasio Aspek</span>
+                            <div class="pill-group p-1 rounded-xl grid grid-cols-2 gap-1">
+                                <button type="button" onclick="setVideoRatio('9:16')" id="vratio-9-16" class="pill-item pill-active py-2 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5" title="Vertikal">
+                                    <span class="w-2.5 h-4 border-[1.5px] border-current rounded-[2px] inline-block"></span>
+                                    <span>9:16</span>
+                                </button>
+                                <button type="button" onclick="setVideoRatio('16:9')" id="vratio-16-9" class="pill-item py-2 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5" title="Horizontal">
+                                    <span class="w-4 h-2.5 border-[1.5px] border-current rounded-[2px] inline-block"></span>
+                                    <span>16:9</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Primary Generate CTA Button -->
+                <div class="pt-1">
+                    <button type="button" id="btn-generate-video" onclick="generateVideo()" class="w-full py-3.5 px-5 rounded-xl cta-gradient text-white font-bold text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-clapperboard"></i>
+                        <span id="label-generate-video">Generate Video (4 Kredit)</span>
+                    </button>
+                    <p class="text-[11px] text-zinc-500 text-center mt-2">
+                        15d: 480p (4 Kr) • 720p (5 Kr) &nbsp;|&nbsp; 30d: 480p (5 Kr) • 720p (6 Kr)
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- RIGHT PREVIEW STAGE -->
+            <div class="studio-panel rounded-2xl p-4 sm:p-6 min-h-[500px] lg:min-h-[calc(100vh-96px)] flex flex-col justify-between stage-grid-bg lg:sticky lg:top-20">
+                
+                <!-- Stage Top Bar -->
+                <div class="flex items-center justify-between pb-3 border-b border-white/[0.07]">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                        <span class="text-xs font-semibold text-zinc-300">Preview Stage — Seedance 2.5</span>
+                    </div>
+                    <span id="stage-video-status" class="font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.05] text-zinc-400 border border-white/10">
+                        Siap
+                    </span>
+                </div>
+
+                <!-- Stage State 1: Empty / Ready -->
+                <div id="stage-video-idle" class="flex-grow flex flex-col items-center justify-center text-center py-12 px-4">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/15 to-cyan-500/15 border border-white/10 flex items-center justify-center mb-4 shadow-lg">
+                        <i class="fa-solid fa-film text-2xl text-indigo-400"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-1.5">Kanvas Video Sinematik</h3>
+                    <p class="text-xs text-zinc-400 max-w-sm leading-relaxed mb-5">
+                        Pilih mode <span class="text-zinc-200 font-medium">Teks to Video</span>, <span class="text-zinc-200 font-medium">Image to Video</span>, atau <span class="text-zinc-200 font-medium">Multi Referensi</span> hingga 9 gambar, lalu tekan Generate.
+                    </p>
+                    <div class="flex flex-wrap items-center justify-center gap-2">
+                        <button type="button" onclick="switchMainTab('image')" class="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-200 transition-colors cursor-pointer">
+                            Coba 1 Gambar Gratis (1 Kredit)
+                        </button>
+                        <button type="button" onclick="openTopupModal()" class="px-3.5 py-2 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-400/30 text-xs font-semibold text-indigo-300 transition-colors cursor-pointer">
+                            Top Up Kredit QRIS
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stage State 2: Real-Time Rendering Overlay -->
+                <div id="stage-video-loading" class="hidden flex-grow flex flex-col items-center justify-center text-center py-12 px-4 space-y-5">
+                    <div class="relative w-20 h-20 flex items-center justify-center">
+                        <div class="absolute inset-0 rounded-full border-2 border-white/10"></div>
+                        <div class="absolute inset-0 rounded-full border-2 border-t-cyan-400 border-r-indigo-500 border-b-transparent border-l-transparent animate-spin"></div>
+                        <span id="render-video-percent" class="font-mono text-sm font-bold text-white">0%</span>
+                    </div>
+
+                    <div class="w-full max-w-sm space-y-2.5">
+                        <p id="render-video-stage-text" class="text-xs font-semibold text-cyan-300">
+                            Menganalisis prompt & referensi...
+                        </p>
+                        <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div id="render-video-bar" class="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-150" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-[11px] font-mono text-zinc-500">
+                            <span id="render-video-spec">15 Detik • 480p • 9:16</span>
+                            <span id="render-video-time">0.0s / 15.0s</span>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="cancelVideoRender()" class="px-3.5 py-1.5 rounded-lg bg-white/[0.05] hover:bg-rose-500/15 border border-white/10 hover:border-rose-500/30 text-zinc-400 hover:text-rose-300 text-xs font-medium transition-colors cursor-pointer">
+                        Batalkan Render
+                    </button>
+                </div>
+
+                <!-- Stage State 3: Video Output Player -->
+                <div id="stage-video-result" class="hidden flex-grow flex flex-col justify-between pt-4 space-y-4">
+                    <div id="video-player-wrapper" class="w-full max-w-[260px] aspect-[9/16] mx-auto rounded-xl overflow-hidden bg-black border border-white/15 shadow-2xl flex items-center justify-center">
+                        <video id="video-output-player" controls autoplay loop playsinline class="w-full h-full object-contain bg-black"></video>
+                    </div>
+
+                    <div class="pt-3 border-t border-white/[0.07] space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <p id="video-result-caption" class="text-xs text-zinc-300 line-clamp-1 flex-1 min-w-0">Prompt video...</p>
+                            <div class="flex items-center gap-1.5 font-mono text-[10px] text-zinc-400 shrink-0">
+                                <span id="video-tag-mode" class="px-2 py-0.5 rounded bg-white/[0.06] border border-white/10">Teks to Video</span>
+                                <span id="video-tag-spec" class="px-2 py-0.5 rounded bg-white/[0.06] border border-white/10">15d • 480p • 9:16</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" onclick="downloadCurrentVideo()" class="flex-1 py-2.5 px-4 rounded-xl cta-gradient text-white font-semibold text-xs flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Unduh Video (.webm)</span>
+                            </button>
+                            <button type="button" onclick="saveCurrentVideoToGallery()" class="py-2.5 px-4 rounded-xl bg-white/[0.06] hover:bg-white/10 border border-white/10 text-zinc-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                                <i class="fa-solid fa-bookmark text-cyan-400"></i>
+                                <span>Simpan ke Galeri</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- TAB 2: IMAGE STUDIO (2-COLUMN WORKSPACE)                     -->
+        <!-- ============================================================ -->
+        <section id="workspace-image" class="hidden grid grid-cols-1 lg:grid-cols-[430px_1fr] gap-5 items-start">
+            
+            <!-- LEFT CONTROL PANEL -->
+            <div class="studio-panel rounded-2xl p-4 sm:p-5 space-y-5 lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto">
+                
+                <!-- 1. Mode Selector (2 Buttons) -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Mode Gambar AI</span>
+                        <span class="text-[11px] font-mono text-amber-400">1 Kredit / Gambar</span>
+                    </div>
+                    <div class="pill-group p-1 rounded-xl grid grid-cols-2 gap-1">
+                        <button type="button" onclick="setImageMode('text-to-image')" id="imode-text-to-image" class="pill-item pill-active py-2 px-3 rounded-lg text-xs font-semibold text-center">
+                            Teks to Image
+                        </button>
+                        <button type="button" onclick="setImageMode('image-to-image')" id="imode-image-to-image" class="pill-item py-2 px-3 rounded-lg text-xs font-semibold text-center">
+                            Image to Image
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Multi-Reference Uploader up to 9 Images ("Image to Image") -->
+                <div id="panel-image-multiref" class="hidden space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-zinc-200">Referensi Gambar (Maks. 9 Gambar)</span>
+                            <span id="badge-i-multiref-count" class="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">0/9</span>
+                        </div>
+                        <button type="button" id="btn-clear-i-multiref" onclick="clearAllImageMultiRef()" class="hidden text-[11px] text-rose-400 hover:text-rose-300 font-medium whitespace-nowrap cursor-pointer">
+                            Hapus Semua
+                        </button>
+                    </div>
+
+                    <input type="file" id="input-image-multiref" accept="image/*" multiple class="hidden" onchange="handleImageMultiRefUpload(event)">
+
+                    <div id="grid-image-multiref" class="grid grid-cols-3 gap-2">
+                        <!-- Rendered dynamically -->
+                    </div>
+
+                    <!-- Transformation Strength Slider (10% - 100%) -->
+                    <div class="studio-subcard rounded-xl p-3 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label for="slider-ref-strength" class="text-xs font-medium text-zinc-300">Kekuatan Transformasi</label>
+                            <span id="label-ref-strength" class="font-mono text-xs font-semibold text-cyan-400">65%</span>
+                        </div>
+                        <input type="range" id="slider-ref-strength" min="10" max="100" value="65" oninput="updateRefStrength(this.value)" class="w-full">
+                    </div>
+                </div>
+
+                <!-- 3. Prompt Textarea (20.000 Karakter) -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label for="prompt-image" class="text-xs font-semibold text-zinc-200">Prompt Gambar</label>
+                        <button type="button" onclick="clearImagePrompt()" class="text-[11px] text-zinc-400 hover:text-white font-medium transition-colors cursor-pointer">
+                            Clear
+                        </button>
+                    </div>
+                    <div class="relative rounded-xl bg-[#090b10] border border-white/10 focus-within:border-indigo-500/60 transition-colors">
+                        <textarea id="prompt-image" rows="5" maxlength="20000" oninput="updateImagePromptCounter()" placeholder="Deskripsikan subjek, komposisi, pencahayaan, dan detail gambar yang ingin dibuat..." class="w-full bg-transparent px-3.5 pt-3 pb-7 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"></textarea>
+                        <div class="absolute bottom-2 right-3 text-[10px] font-mono text-zinc-500 pointer-events-none">
+                            <span id="counter-image-prompt">0</span> / 20.000 karakter
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Image Parameters (Resolusi & Rasio Aspek) -->
+                <div class="grid grid-cols-2 gap-3 pt-1 border-t border-white/[0.07]">
+                    <!-- Resolusi -->
+                    <div class="space-y-2">
+                        <span class="block text-xs font-semibold text-zinc-300">Resolusi</span>
+                        <div class="pill-group p-1 rounded-xl grid grid-cols-2 gap-1">
+                            <button type="button" onclick="setImageResolution('480p')" id="ires-480p" class="pill-item pill-active py-2 px-2 rounded-lg text-xs font-semibold text-center">
+                                480p
+                            </button>
+                            <button type="button" onclick="setImageResolution('720p')" id="ires-720p" class="pill-item py-2 px-2 rounded-lg text-xs font-semibold text-center">
+                                720p
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Rasio Aspek -->
+                    <div class="space-y-2">
+                        <span class="block text-xs font-semibold text-zinc-300">Rasio Aspek</span>
+                        <div class="pill-group p-1 rounded-xl grid grid-cols-2 gap-1">
+                            <button type="button" onclick="setImageRatio('9:16')" id="iratio-9-16" class="pill-item pill-active py-2 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5">
+                                <span class="w-2.5 h-4 border-[1.5px] border-current rounded-[2px] inline-block"></span>
+                                <span>9:16</span>
+                            </button>
+                            <button type="button" onclick="setImageRatio('16:9')" id="iratio-16-9" class="pill-item py-2 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5">
+                                <span class="w-4 h-2.5 border-[1.5px] border-current rounded-[2px] inline-block"></span>
+                                <span>16:9</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Primary Generate Image CTA Button -->
+                <div class="pt-1">
+                    <button type="button" id="btn-generate-image" onclick="generateImage()" class="w-full py-3.5 px-5 rounded-xl cta-gradient text-white font-bold text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Generate Gambar (1 Kredit)</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- RIGHT IMAGE PREVIEW STAGE -->
+            <div class="studio-panel rounded-2xl p-4 sm:p-6 min-h-[500px] lg:min-h-[calc(100vh-96px)] flex flex-col justify-between stage-grid-bg lg:sticky lg:top-20">
+                
+                <!-- Stage Top Bar -->
+                <div class="flex items-center justify-between pb-3 border-b border-white/[0.07]">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                        <span class="text-xs font-semibold text-zinc-300">Image Canvas — High Resolution</span>
+                    </div>
+                    <span id="stage-image-status" class="font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.05] text-zinc-400 border border-white/10">
+                        Siap
+                    </span>
+                </div>
+
+                <!-- Stage State 1: Idle -->
+                <div id="stage-image-idle" class="flex-grow flex flex-col items-center justify-center text-center py-12 px-4">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/15 to-violet-500/15 border border-white/10 flex items-center justify-center mb-4 shadow-lg">
+                        <i class="fa-regular fa-image text-2xl text-indigo-400"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-white mb-1.5">Kanvas Gambar AI (1 Kredit)</h3>
+                    <p class="text-xs text-zinc-400 max-w-sm leading-relaxed">
+                        Buat gambar dari teks atau gabungkan hingga <span class="text-zinc-200 font-medium">9 gambar referensi</span> sekaligus. Hasilnya bisa langsung diubah menjadi video Seedance 2.5.
+                    </p>
+                </div>
+
+                <!-- Stage State 2: Loading -->
+                <div id="stage-image-loading" class="hidden flex-grow flex flex-col items-center justify-center text-center py-12 px-4 space-y-4">
+                    <div class="w-16 h-16 rounded-full border-2 border-white/10 border-t-indigo-400 border-r-cyan-400 animate-spin"></div>
+                    <p id="render-image-stage-text" class="text-xs font-semibold text-indigo-300">
+                        Merender karya gambar resolusi tinggi...
+                    </p>
+                </div>
+
+                <!-- Stage State 3: Image Output Result -->
+                <div id="stage-image-result" class="hidden flex-grow flex flex-col justify-between pt-4 space-y-4">
+                    <div id="image-player-wrapper" class="w-full max-w-[260px] aspect-[9/16] mx-auto rounded-xl overflow-hidden bg-black border border-white/15 shadow-2xl flex items-center justify-center">
+                        <img id="image-output-el" src="" alt="Hasil Gambar AI" class="w-full h-full object-contain">
+                    </div>
+
+                    <div class="pt-3 border-t border-white/[0.07] space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <p id="image-result-caption" class="text-xs text-zinc-300 line-clamp-1 flex-1 min-w-0">Prompt gambar...</p>
+                            <span id="image-tag-spec" class="font-mono text-[10px] px-2 py-0.5 rounded bg-white/[0.06] border border-white/10 text-zinc-400 shrink-0">480p • 9:16</span>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" onclick="sendOutputImageToVideoStudio()" class="flex-1 py-2.5 px-4 rounded-xl cta-gradient text-white font-semibold text-xs flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-clapperboard"></i>
+                                <span>Jadikan Video (Seedance 2.5)</span>
+                            </button>
+                            <button type="button" onclick="downloadCurrentImage()" class="py-2.5 px-4 rounded-xl bg-white/[0.06] hover:bg-white/10 border border-white/10 text-zinc-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                                <i class="fa-solid fa-download text-emerald-400"></i>
+                                <span>Unduh PNG</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- TAB 3: GALERI KARYA                                          -->
+        <!-- ============================================================ -->
+        <section id="workspace-gallery" class="hidden space-y-5">
+            
+            <div class="studio-panel rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-bold text-white">Galeri Karya</h2>
+                    <p class="text-xs text-zinc-400 mt-0.5">Koleksi video dan gambar yang telah Anda buat pada sesi ini.</p>
+                </div>
+
+                <div class="pill-group p-1 rounded-full flex items-center gap-1 self-start sm:self-auto">
+                    <button type="button" onclick="setGalleryFilter('all')" id="gfilter-all" class="pill-item pill-active px-3.5 py-1 rounded-full text-xs font-semibold">
+                        Semua
+                    </button>
+                    <button type="button" onclick="setGalleryFilter('video')" id="gfilter-video" class="pill-item px-3.5 py-1 rounded-full text-xs font-semibold">
+                        Video
+                    </button>
+                    <button type="button" onclick="setGalleryFilter('image')" id="gfilter-image" class="pill-item px-3.5 py-1 rounded-full text-xs font-semibold">
+                        Gambar
+                    </button>
+                </div>
+            </div>
+
+            <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- Populated dynamically -->
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ==================== MODAL: TOP-UP QRIS (3 PAKET FINAL) ==================== -->
+    <div id="modal-topup" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div class="studio-panel max-w-2xl w-full rounded-2xl p-5 sm:p-6 border border-white/15 relative my-auto max-h-[92vh] overflow-y-auto">
+            <button type="button" onclick="closeTopupModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center text-sm transition-colors cursor-pointer">
+                ×
+            </button>
+
+            <div class="mb-5">
+                <h3 class="text-base sm:text-lg font-bold text-white">Top Up Kredit Jeck.studioAI</h3>
+                <p class="text-xs text-zinc-400 mt-0.5">Pilih paket kredit QRIS instan — mendukung semua e-wallet & mobile banking.</p>
+            </div>
+
+            <!-- 3 Final Packages -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                <!-- 1. Paket Starter -->
+                <button type="button" onclick="selectTopupPackage('starter')" id="pkg-starter" class="text-left p-4 rounded-xl bg-[#090b10] border border-white/10 hover:border-indigo-400/50 transition-all flex flex-col justify-between cursor-pointer">
+                    <div>
+                        <span class="text-xs font-semibold text-zinc-300">Paket Starter</span>
+                        <div class="font-mono font-bold text-xl text-white mt-1">11 Kredit</div>
+                        <div class="font-mono font-bold text-sm text-cyan-400 mt-0.5">Rp 25.000</div>
+                    </div>
+                    <div class="text-[11px] font-mono text-zinc-500 mt-3 pt-2.5 border-t border-white/[0.07]">
+                        Rp 2.273 / kredit
+                    </div>
+                </button>
+
+                <!-- 2. Paket Kreator (Paling Laris) -->
+                <button type="button" onclick="selectTopupPackage('kreator')" id="pkg-kreator" class="text-left p-4 rounded-xl bg-indigo-500/10 border border-indigo-400/60 transition-all relative flex flex-col justify-between shadow-lg shadow-indigo-500/10 cursor-pointer">
+                    <span class="absolute -top-2.5 right-3 text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500 text-white shadow">
+                        Paling Laris
+                    </span>
+                    <div>
+                        <span class="text-xs font-semibold text-white">Paket Kreator</span>
+                        <div class="font-mono font-bold text-xl text-white mt-1">23 Kredit</div>
+                        <div class="font-mono font-bold text-sm text-amber-400 mt-0.5">Rp 50.000</div>
+                    </div>
+                    <div class="text-[11px] font-mono text-indigo-300 mt-3 pt-2.5 border-t border-white/10">
+                        Rp 2.174 / kredit
+                    </div>
+                </button>
+
+                <!-- 3. Paket Pro -->
+                <button type="button" onclick="selectTopupPackage('pro')" id="pkg-pro" class="text-left p-4 rounded-xl bg-[#090b10] border border-white/10 hover:border-indigo-400/50 transition-all flex flex-col justify-between cursor-pointer">
+                    <div>
+                        <span class="text-xs font-semibold text-zinc-300">Paket Pro</span>
+                        <div class="font-mono font-bold text-xl text-white mt-1">47 Kredit</div>
+                        <div class="font-mono font-bold text-sm text-violet-400 mt-0.5">Rp 100.000</div>
+                    </div>
+                    <div class="text-[11px] font-mono text-zinc-500 mt-3 pt-2.5 border-t border-white/[0.07]">
+                        Rp 2.128 / kredit
+                    </div>
+                </button>
+            </div>
+
+            <!-- Crisp SVG QRIS Payment Section -->
+            <div class="rounded-xl bg-[#090b10] border border-white/10 p-4 flex flex-col sm:flex-row items-center gap-4">
+                <div class="bg-white p-3 rounded-xl shrink-0 text-center shadow-md">
+                    <div class="flex items-center justify-between text-[9px] font-extrabold text-zinc-900 tracking-wider mb-1.5 px-0.5">
+                        <span>QRIS</span>
+                        <span class="text-rose-600">GPN</span>
+                    </div>
+                    <div id="qris-svg-holder" class="w-[144px] h-[144px] mx-auto"></div>
+                    <p class="text-[8px] font-mono font-bold text-zinc-600 mt-1.5">JECK.STUDIOAI • ID1026991827</p>
+                </div>
+
+                <div class="flex-1 w-full space-y-3 text-center sm:text-left">
+                    <div>
+                        <span class="text-[11px] text-zinc-400">Nominal Tagihan</span>
+                        <div class="flex items-baseline justify-center sm:justify-start gap-2 flex-wrap">
+                            <span id="qris-amount-display" class="font-mono font-extrabold text-2xl text-white">Rp 50.000</span>
+                            <span id="qris-credits-display" class="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">+23 Kredit</span>
+                        </div>
+                        <p id="qris-package-name" class="text-xs text-zinc-400 mt-0.5">Paket Kreator (Rp 2.174 / kredit)</p>
+                    </div>
+
+                    <div class="space-y-2 pt-1">
+                        <button type="button" onclick="confirmSimulatedTopup()" class="w-full py-2.5 px-4 rounded-xl cta-gradient text-white font-semibold text-xs flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Konfirmasi Pembayaran (Tambah Kredit)</span>
+                        </button>
+
+                        <a id="qris-wa-btn" href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 rounded-xl bg-white/[0.05] hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/30 text-zinc-200 hover:text-emerald-300 font-semibold text-xs flex items-center justify-center gap-2 transition-colors">
+                            <i class="fa-brands fa-whatsapp text-emerald-400 text-sm"></i>
+                            <span>Kirim Bukti via WhatsApp</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: GALLERY LIGHTBOX ==================== -->
+    <div id="modal-lightbox" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="studio-panel max-w-3xl w-full rounded-2xl overflow-hidden border border-white/15 relative flex flex-col max-h-[90vh]">
+            <button type="button" onclick="closeLightbox()" class="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center border border-white/15 text-sm cursor-pointer">
+                ×
+            </button>
+            <div id="lightbox-stage" class="bg-black flex items-center justify-center overflow-hidden max-h-[65vh] p-2"></div>
+            <div class="p-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <span id="lightbox-meta" class="font-mono text-[10px] text-cyan-400 uppercase">VIDEO</span>
+                    <p id="lightbox-caption" class="text-xs text-zinc-200 line-clamp-2 mt-0.5"></p>
+                </div>
+                <div id="lightbox-cta" class="flex items-center gap-2 shrink-0"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST CONTAINER ==================== -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
+
+    <!-- ==================== MINIMAL FOOTER ==================== -->
+    <footer class="border-t border-white/[0.06] py-3.5 mt-6">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-1.5 text-[11px] text-zinc-500">
+            <span>© 2026 <strong class="text-zinc-300 font-semibold">Jeck.studioAI</strong> • Powered by Seedance 2.5</span>
+            <span class="font-mono">Teks to Video • Image to Video • Multi Referensi (9 Gambar)</span>
+        </div>
+    </footer>
+
+    <!-- ==================== STANDARD GLOBAL APPLICATION SCRIPT ==================== -->
+    <script>
+        // 1. SAFE STORAGE HELPERS (Sandbox & Private-Mode Safe)
+        const STORAGE_KEY_CREDITS = 'jeck_studio_credits_v1';
+        const memoryFallbackStorage = {};
+
+        function safeGetStorage(key) {
+            try {
+                return window.localStorage.getItem(key);
+            } catch (e) {
+                return Object.prototype.hasOwnProperty.call(memoryFallbackStorage, key)
+                    ? memoryFallbackStorage[key]
+                    : null;
+            }
+        }
+
+        function safeSetStorage(key, value) {
+            try {
+                window.localStorage.setItem(key, String(value));
+            } catch (e) {
+                memoryFallbackStorage[key] = String(value);
+            }
+        }
+
+        // 2. TOP-UP PACKAGES CONFIGURATION
+        const TOPUP_PACKAGES = {
+            starter: {
+                id: 'starter',
+                name: 'Paket Starter',
+                price: 25000,
+                priceFormatted: 'Rp 25.000',
+                credits: 11,
+                unitFormatted: 'Rp 2.273 / kredit'
+            },
+            kreator: {
+                id: 'kreator',
+                name: 'Paket Kreator',
+                price: 50000,
+                priceFormatted: 'Rp 50.000',
+                credits: 23,
+                unitFormatted: 'Rp 2.174 / kredit'
+            },
+            pro: {
+                id: 'pro',
+                name: 'Paket Pro',
+                price: 100000,
+                priceFormatted: 'Rp 100.000',
+                credits: 47,
+                unitFormatted: 'Rp 2.128 / kredit'
+            }
+        };
+
+        // 3. CENTRAL APPLICATION STATE
+        const appState = {
+            credits: 1,
+            activeTab: 'video',
+            selectedPackage: 'kreator',
+            // Video Studio State
+            videoMode: 'text-to-video',
+            videoDuration: 15,
+            videoResolution: '480p',
+            videoRatio: '9:16',
+            videoI2VImage: null,
+            videoMultiRefs: [],
+            currentVideo: null,
+            isVideoRendering: false,
+            activeRecorder: null,
+            activeRenderInterval: null,
+            // Image Studio State
+            imageMode: 'text-to-image',
+            imageResolution: '480p',
+            imageRatio: '9:16',
+            imageRefStrength: 65,
+            imageMultiRefs: [],
+            currentImage: null,
+            isImageRendering: false,
+            // Gallery State
+            galleryFilter: 'all',
+            gallery: []
+        };
+
+        // 4. CREDIT CALCULATION & PERSISTENCE
+        function getVideoCreditCost(duration, resolution) {
+            if (duration === 15 && resolution === '480p') return 4;
+            if (duration === 15 && resolution === '720p') return 5;
+            if (duration === 30 && resolution === '480p') return 5;
+            if (duration === 30 && resolution === '720p') return 6;
+            return 4;
+        }
+
+        function loadUserCredits() {
+            const saved = safeGetStorage(STORAGE_KEY_CREDITS);
+            if (saved !== null && !isNaN(parseInt(saved, 10))) {
+                appState.credits = Math.max(0, parseInt(saved, 10));
+            } else {
+                appState.credits = 1;
+                safeSetStorage(STORAGE_KEY_CREDITS, 1);
+            }
+            updateCreditBadge();
+        }
+
+        function saveUserCredits() {
+            safeSetStorage(STORAGE_KEY_CREDITS, appState.credits);
+            updateCreditBadge();
+        }
+
+        function updateCreditBadge() {
+            const el = document.getElementById('header-credit-count');
+            if (el) {
+                el.textContent = String(appState.credits);
+            }
+        }
+
+        // 5. INITIALIZATION ON DOMCONTENTLOADED
+        function initApp() {
+            loadUserCredits();
+            renderQrisSvg();
+            selectTopupPackage('kreator');
+            renderVideoMultiRefGrid();
+            renderImageMultiRefGrid();
+            updateVideoGenerateLabel();
+            renderGallery();
+            setupDragAndDrop();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+
+        function setupDragAndDrop() {
+            const i2vZone = document.getElementById('dropzone-video-i2v');
+            if (i2vZone) {
+                i2vZone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    i2vZone.classList.add('border-indigo-400');
+                });
+                i2vZone.addEventListener('dragleave', function() {
+                    i2vZone.classList.remove('border-indigo-400');
+                });
+                i2vZone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    i2vZone.classList.remove('border-indigo-400');
+                    const files = e.dataTransfer && e.dataTransfer.files;
+                    if (files && files[0] && files[0].type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            setVideoI2VData(ev.target.result, files[0].name);
+                        };
+                        reader.readAsDataURL(files[0]);
+                    }
+                });
+            }
+        }
+
+        // 6. MAIN TAB SWITCHING
+        function switchMainTab(tabName) {
+            appState.activeTab = tabName;
+            const tabs = ['video', 'image', 'gallery'];
+            for (let i = 0; i < tabs.length; i++) {
+                const t = tabs[i];
+                const btn = document.getElementById('nav-tab-' + t);
+                const panel = document.getElementById('workspace-' + t);
+                if (!btn || !panel) continue;
+                if (t === tabName) {
+                    btn.classList.add('pill-active');
+                    panel.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('pill-active');
+                    panel.classList.add('hidden');
+                }
+            }
+            if (tabName === 'gallery') {
+                renderGallery();
+            }
+        }
+
+        // 7. SHARE URL ACTION
+        function shareWebsiteUrl() {
+            const url = window.location.href;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Jeck.studioAI — Studio Video & Gambar AI (Seedance 2.5)',
+                    text: 'Buat video & gambar AI sinematik secara instan di Jeck.studioAI!',
+                    url: url
+                }).catch(function() {});
+                return;
+            }
+            const helperInput = document.createElement('input');
+            helperInput.value = url;
+            document.body.appendChild(helperInput);
+            helperInput.select();
+            try {
+                document.execCommand('copy');
+                showToast('Link website berhasil disalin ke clipboard!', 'success');
+            } catch (e) {
+                showToast('Salin link dari address bar browser Anda untuk dibagikan.', 'info');
+            }
+            helperInput.remove();
+        }
+
+        // ==================== VIDEO STUDIO CONTROLS ====================
+        function setVideoMode(mode) {
+            appState.videoMode = mode;
+            const modes = ['text-to-video', 'image-to-video', 'multi-referensi'];
+            for (let i = 0; i < modes.length; i++) {
+                const m = modes[i];
+                const btn = document.getElementById('vmode-' + m);
+                if (btn) {
+                    if (m === mode) btn.classList.add('pill-active');
+                    else btn.classList.remove('pill-active');
+                }
+            }
+            document.getElementById('panel-video-i2v').classList.toggle('hidden', mode !== 'image-to-video');
+            document.getElementById('panel-video-multiref').classList.toggle('hidden', mode !== 'multi-referensi');
+        }
+
+        function triggerVideoI2VInput() {
+            const input = document.getElementById('input-video-i2v');
+            if (input) input.click();
+        }
+
+        function handleVideoI2VUpload(event) {
+            const file = event.target && event.target.files && event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                setVideoI2VData(e.target.result, file.name);
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function setVideoI2VData(dataUrl, filename) {
+            appState.videoI2VImage = { dataUrl: dataUrl, name: filename };
+            document.getElementById('thumb-video-i2v').src = dataUrl;
+            document.getElementById('name-video-i2v').textContent = filename;
+            document.getElementById('dropzone-video-i2v').classList.add('hidden');
+            document.getElementById('preview-video-i2v').classList.remove('hidden');
+            document.getElementById('btn-clear-v-i2v').classList.remove('hidden');
+        }
+
+        function clearVideoI2VImage() {
+            appState.videoI2VImage = null;
+            document.getElementById('thumb-video-i2v').src = '';
+            document.getElementById('dropzone-video-i2v').classList.remove('hidden');
+            document.getElementById('preview-video-i2v').classList.add('hidden');
+            document.getElementById('btn-clear-v-i2v').classList.add('hidden');
+        }
+
+        function triggerVideoMultiRefInput() {
+            const input = document.getElementById('input-video-multiref');
+            if (input) input.click();
+        }
+
+        function handleVideoMultiRefUpload(event) {
+            const files = Array.from((event.target && event.target.files) || []);
+            if (!files.length) return;
+
+            const slotsLeft = 9 - appState.videoMultiRefs.length;
+            if (slotsLeft <= 0) {
+                showToast('Maksimal 9 gambar referensi sudah tercapai.', 'warning');
+                return;
+            }
+
+            const selectedFiles = files.slice(0, slotsLeft);
+            selectedFiles.forEach(function(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (appState.videoMultiRefs.length < 9) {
+                        appState.videoMultiRefs.push({
+                            id: 'vmref-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+                            dataUrl: e.target.result,
+                            name: file.name
+                        });
+                        renderVideoMultiRefGrid();
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+            event.target.value = '';
+        }
+
+        function removeVideoMultiRef(id) {
+            appState.videoMultiRefs = appState.videoMultiRefs.filter(function(item) {
+                return item.id !== id;
+            });
+            renderVideoMultiRefGrid();
+        }
+
+        function clearAllVideoMultiRef() {
+            appState.videoMultiRefs = [];
+            renderVideoMultiRefGrid();
+        }
+
+        function renderVideoMultiRefGrid() {
+            const grid = document.getElementById('grid-video-multiref');
+            const badge = document.getElementById('badge-v-multiref-count');
+            const clearBtn = document.getElementById('btn-clear-v-multiref');
+            if (!grid || !badge || !clearBtn) return;
+
+            const count = appState.videoMultiRefs.length;
+            badge.textContent = count + '/9';
+            clearBtn.classList.toggle('hidden', count === 0);
+
+            grid.innerHTML = '';
+            appState.videoMultiRefs.forEach(function(item, idx) {
+                const card = document.createElement('div');
+                card.className = 'relative aspect-square rounded-xl overflow-hidden bg-[#090b10] border border-white/10 group';
+                card.innerHTML =
+                    '<img src="' + item.dataUrl + '" alt="Referensi #' + (idx + 1) + '" class="w-full h-full object-cover">' +
+                    '<span class="absolute top-1.5 left-1.5 font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/75 text-cyan-300 border border-white/10">#' + (idx + 1) + '</span>' +
+                    '<button type="button" onclick="removeVideoMultiRef(\'' + item.id + '\')" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/80 hover:bg-rose-600 text-white text-xs flex items-center justify-center border border-white/15 transition-colors cursor-pointer" title="Hapus">×</button>';
+                grid.appendChild(card);
+            });
+
+            if (count < 9) {
+                const addBtn = document.createElement('button');
+                addBtn.type = 'button';
+                addBtn.onclick = triggerVideoMultiRefInput;
+                addBtn.className = 'aspect-square rounded-xl border border-dashed border-white/15 hover:border-indigo-400/60 bg-[#090b10] hover:bg-indigo-500/[0.06] flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-indigo-300 transition-all cursor-pointer';
+                addBtn.innerHTML =
+                    '<i class="fa-solid fa-plus text-sm"></i>' +
+                    '<span class="text-[11px] font-semibold">+ Upload</span>';
+                grid.appendChild(addBtn);
+            }
+        }
+
+        function updateVideoPromptCounter() {
+            const textarea = document.getElementById('prompt-video');
+            const counter = document.getElementById('counter-video-prompt');
+            if (textarea && counter) {
+                counter.textContent = textarea.value.length.toLocaleString('id-ID');
+            }
+        }
+
+        function clearVideoPrompt() {
+            const textarea = document.getElementById('prompt-video');
+            if (textarea) textarea.value = '';
+            updateVideoPromptCounter();
+        }
+
+        function setVideoDuration(dur) {
+            appState.videoDuration = dur;
+            [15, 30].forEach(function(d) {
+                const btn = document.getElementById('vdur-' + d);
+                if (btn) btn.classList.toggle('pill-active', d === dur);
+            });
+            updateVideoGenerateLabel();
+        }
+
+        function setVideoResolution(res) {
+            appState.videoResolution = res;
+            ['480p', '720p'].forEach(function(r) {
+                const btn = document.getElementById('vres-' + r);
+                if (btn) btn.classList.toggle('pill-active', r === res);
+            });
+            updateVideoGenerateLabel();
+        }
+
+        function setVideoRatio(ratio) {
+            appState.videoRatio = ratio;
+            ['9:16', '16:9'].forEach(function(r) {
+                const btn = document.getElementById('vratio-' + r.replace(':', '-'));
+                if (btn) btn.classList.toggle('pill-active', r === ratio);
+            });
+        }
+
+        function updateVideoGenerateLabel() {
+            const cost = getVideoCreditCost(appState.videoDuration, appState.videoResolution);
+            const label = document.getElementById('label-generate-video');
+            if (label) {
+                label.textContent = 'Generate Video (' + cost + ' Kredit)';
+            }
+        }
+
+        // ==================== IMAGE STUDIO CONTROLS ====================
+        function setImageMode(mode) {
+            appState.imageMode = mode;
+            ['text-to-image', 'image-to-image'].forEach(function(m) {
+                const btn = document.getElementById('imode-' + m);
+                if (btn) btn.classList.toggle('pill-active', m === mode);
+            });
+            document.getElementById('panel-image-multiref').classList.toggle('hidden', mode !== 'image-to-image');
+        }
+
+        function triggerImageMultiRefInput() {
+            const input = document.getElementById('input-image-multiref');
+            if (input) input.click();
+        }
+
+        function handleImageMultiRefUpload(event) {
+            const files = Array.from((event.target && event.target.files) || []);
+            if (!files.length) return;
+
+            const slotsLeft = 9 - appState.imageMultiRefs.length;
+            if (slotsLeft <= 0) {
+                showToast('Maksimal 9 gambar referensi sudah tercapai.', 'warning');
+                return;
+            }
+
+            const selectedFiles = files.slice(0, slotsLeft);
+            selectedFiles.forEach(function(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (appState.imageMultiRefs.length < 9) {
+                        appState.imageMultiRefs.push({
+                            id: 'imref-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+                            dataUrl: e.target.result,
+                            name: file.name
+                        });
+                        renderImageMultiRefGrid();
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+            event.target.value = '';
+        }
+
+        function removeImageMultiRef(id) {
+            appState.imageMultiRefs = appState.imageMultiRefs.filter(function(item) {
+                return item.id !== id;
+            });
+            renderImageMultiRefGrid();
+        }
+
+        function clearAllImageMultiRef() {
+            appState.imageMultiRefs = [];
+            renderImageMultiRefGrid();
+        }
+
+        function renderImageMultiRefGrid() {
+            const grid = document.getElementById('grid-image-multiref');
+            const badge = document.getElementById('badge-i-multiref-count');
+            const clearBtn = document.getElementById('btn-clear-i-multiref');
+            if (!grid || !badge || !clearBtn) return;
+
+            const count = appState.imageMultiRefs.length;
+            badge.textContent = count + '/9';
+            clearBtn.classList.toggle('hidden', count === 0);
+
+            grid.innerHTML = '';
+            appState.imageMultiRefs.forEach(function(item, idx) {
+                const card = document.createElement('div');
+                card.className = 'relative aspect-square rounded-xl overflow-hidden bg-[#090b10] border border-white/10 group';
+                card.innerHTML =
+                    '<img src="' + item.dataUrl + '" alt="Referensi #' + (idx + 1) + '" class="w-full h-full object-cover">' +
+                    '<span class="absolute top-1.5 left-1.5 font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/75 text-indigo-300 border border-white/10">#' + (idx + 1) + '</span>' +
+                    '<button type="button" onclick="removeImageMultiRef(\'' + item.id + '\')" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/80 hover:bg-rose-600 text-white text-xs flex items-center justify-center border border-white/15 transition-colors cursor-pointer" title="Hapus">×</button>';
+                grid.appendChild(card);
+            });
+
+            if (count < 9) {
+                const addBtn = document.createElement('button');
+                addBtn.type = 'button';
+                addBtn.onclick = triggerImageMultiRefInput;
+                addBtn.className = 'aspect-square rounded-xl border border-dashed border-white/15 hover:border-indigo-400/60 bg-[#090b10] hover:bg-indigo-500/[0.06] flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-indigo-300 transition-all cursor-pointer';
+                addBtn.innerHTML =
+                    '<i class="fa-solid fa-plus text-sm"></i>' +
+                    '<span class="text-[11px] font-semibold">+ Upload</span>';
+                grid.appendChild(addBtn);
+            }
+        }
+
+        function updateRefStrength(val) {
+            appState.imageRefStrength = parseInt(val, 10);
+            const label = document.getElementById('label-ref-strength');
+            if (label) label.textContent = val + '%';
+        }
+
+        function updateImagePromptCounter() {
+            const textarea = document.getElementById('prompt-image');
+            const counter = document.getElementById('counter-image-prompt');
+            if (textarea && counter) {
+                counter.textContent = textarea.value.length.toLocaleString('id-ID');
+            }
+        }
+
+        function clearImagePrompt() {
+            const textarea = document.getElementById('prompt-image');
+            if (textarea) textarea.value = '';
+            updateImagePromptCounter();
+        }
+
+        function setImageResolution(res) {
+            appState.imageResolution = res;
+            ['480p', '720p'].forEach(function(r) {
+                const btn = document.getElementById('ires-' + r);
+                if (btn) btn.classList.toggle('pill-active', r === res);
+            });
+        }
+
+        function setImageRatio(ratio) {
+            appState.imageRatio = ratio;
+            ['9:16', '16:9'].forEach(function(r) {
+                const btn = document.getElementById('iratio-' + r.replace(':', '-'));
+                if (btn) btn.classList.toggle('pill-active', r === ratio);
+            });
+        }
+
+        // ==================== CANVAS ARTWORK & VIDEO STREAM ENGINE ====================
+        function getCanvasDimensions(resolution, ratio) {
+            if (resolution === '720p') {
+                return ratio === '9:16' ? { width: 720, height: 1280 } : { width: 1280, height: 720 };
+            }
+            return ratio === '9:16' ? { width: 480, height: 854 } : { width: 854, height: 480 };
+        }
+
+        function drawImageCover(ctx, img, targetW, targetH) {
+            const imgRatio = img.width / img.height;
+            const targetRatio = targetW / targetH;
+            let drawW, drawH, offsetX, offsetY;
+            if (imgRatio > targetRatio) {
+                drawH = targetH;
+                drawW = targetH * imgRatio;
+                offsetX = (targetW - drawW) / 2;
+                offsetY = 0;
+            } else {
+                drawW = targetW;
+                drawH = targetW / imgRatio;
+                offsetX = 0;
+                offsetY = (targetH - drawH) / 2;
+            }
+            ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+        }
+
+        function loadHtmlImage(src) {
+            return new Promise(function(resolve, reject) {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() { resolve(img); };
+                img.onerror = function() { reject(new Error('Gagal memuat gambar')); };
+                img.src = src;
+            });
+        }
+
+        function renderProceduralArtwork(options) {
+            const prompt = options.prompt || '';
+            const resolution = options.resolution || '480p';
+            const ratio = options.ratio || '9:16';
+            const refImages = options.refImages || [];
+            const strength = typeof options.strength === 'number' ? options.strength : 65;
+
+            const dims = getCanvasDimensions(resolution, ratio);
+            const width = dims.width;
+            const height = dims.height;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+
+            const lower = prompt.toLowerCase();
+            let hash = 29;
+            for (let i = 0; i < lower.length; i++) {
+                hash = ((hash << 5) - hash + lower.charCodeAt(i)) | 0;
+            }
+
+            if (refImages.length > 0) {
+                // Base primary reference image
+                drawImageCover(ctx, refImages[0], width, height);
+
+                // Composite remaining reference images (up to 9)
+                const alphaFactor = Math.max(0.18, Math.min(0.88, strength / 100));
+                if (refImages.length > 1) {
+                    const extraAlpha = Math.min(0.45, (alphaFactor * 0.7) / Math.sqrt(refImages.length - 1));
+                    for (let idx = 1; idx < refImages.length; idx++) {
+                        ctx.save();
+                        ctx.globalAlpha = extraAlpha;
+                        ctx.globalCompositeOperation = idx % 2 === 0 ? 'screen' : 'overlay';
+                        drawImageCover(ctx, refImages[idx], width, height);
+                        ctx.restore();
+                    }
+                }
+
+                // Atmospheric color grade driven by prompt keywords
+                ctx.save();
+                ctx.globalCompositeOperation = 'overlay';
+                const grade = ctx.createLinearGradient(0, 0, width, height);
+                if (lower.includes('neon') || lower.includes('cyber') || lower.includes('malam')) {
+                    grade.addColorStop(0, 'rgba(99, 102, 241, ' + (0.58 * alphaFactor).toFixed(2) + ')');
+                    grade.addColorStop(1, 'rgba(6, 182, 212, ' + (0.58 * alphaFactor).toFixed(2) + ')');
+                } else if (lower.includes('emas') || lower.includes('senja') || lower.includes('matahari')) {
+                    grade.addColorStop(0, 'rgba(245, 158, 11, ' + (0.55 * alphaFactor).toFixed(2) + ')');
+                    grade.addColorStop(1, 'rgba(225, 29, 72, ' + (0.42 * alphaFactor).toFixed(2) + ')');
+                } else {
+                    grade.addColorStop(0, 'rgba(99, 102, 241, ' + (0.42 * alphaFactor).toFixed(2) + ')');
+                    grade.addColorStop(1, 'rgba(6, 182, 212, ' + (0.46 * alphaFactor).toFixed(2) + ')');
+                }
+                ctx.fillStyle = grade;
+                ctx.fillRect(0, 0, width, height);
+                ctx.restore();
+            } else {
+                // Rich atmospheric procedural artwork from prompt
+                let c1 = '#080b18', c2 = '#1e2952', c3 = '#38bdf8', orb = '#fde68a';
+                if (lower.includes('neon') || lower.includes('cyber') || lower.includes('kota') || lower.includes('malam')) {
+                    c1 = '#05060f'; c2 = '#1e1b4b'; c3 = '#06b6d4'; orb = '#f43f5e';
+                } else if (lower.includes('hutan') || lower.includes('alam') || lower.includes('gunung')) {
+                    c1 = '#041311'; c2 = '#114232'; c3 = '#6ee7b7'; orb = '#fef3c7';
+                } else if (lower.includes('senja') || lower.includes('emas') || lower.includes('gurun')) {
+                    c1 = '#180914'; c2 = '#7c2d12'; c3 = '#fb923c'; orb = '#fef08a';
+                }
+
+                const sky = ctx.createLinearGradient(0, 0, 0, height);
+                sky.addColorStop(0, c1);
+                sky.addColorStop(0.55, c2);
+                sky.addColorStop(1, c3);
+                ctx.fillStyle = sky;
+                ctx.fillRect(0, 0, width, height);
+
+                // Luminous focal sun / moon
+                const ox = width * (0.25 + (Math.abs(hash) % 50) / 100);
+                const oy = height * 0.34;
+                const or = Math.min(width, height) * 0.2;
+                const radial = ctx.createRadialGradient(ox, oy, or * 0.08, ox, oy, or * 2.6);
+                radial.addColorStop(0, '#ffffff');
+                radial.addColorStop(0.25, orb);
+                radial.addColorStop(1, 'transparent');
+                ctx.fillStyle = radial;
+                ctx.beginPath();
+                ctx.arc(ox, oy, or * 2.6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Parallax silhouettes
+                const isUrban = lower.includes('kota') || lower.includes('gedung') || lower.includes('neon') || lower.includes('cyber');
+                for (let layer = 0; layer < 4; layer++) {
+                    const yBase = height * (0.52 + layer * 0.12);
+                    ctx.fillStyle = 'rgba(6, 7, 12, ' + (0.42 + layer * 0.16).toFixed(2) + ')';
+                    if (isUrban) {
+                        let x = 0, idx = 0;
+                        while (x < width) {
+                            const bw = Math.max(20, (Math.abs(hash + idx * 17 + layer * 5) % 46) + 22);
+                            const bh = (Math.abs(hash + idx * 31 + layer * 11) % Math.floor(height * 0.26)) + height * 0.08;
+                            ctx.fillRect(x, height - bh - (3 - layer) * 32, bw - 2, bh + 120);
+                            if (layer >= 2) {
+                                ctx.fillStyle = layer === 2 ? 'rgba(6, 182, 212, 0.32)' : 'rgba(99, 102, 241, 0.35)';
+                                for (let wy = height - bh + 12; wy < height - 18; wy += 15) {
+                                    if ((Math.floor(wy) + idx) % 3 === 0) {
+                                        ctx.fillRect(x + 4, wy, bw - 10, 2.5);
+                                    }
+                                }
+                                ctx.fillStyle = 'rgba(6, 7, 12, ' + (0.42 + layer * 0.16).toFixed(2) + ')';
+                            }
+                            x += bw;
+                            idx++;
+                        }
+                    } else {
+                        ctx.beginPath();
+                        ctx.moveTo(0, height);
+                        for (let x = 0; x <= width; x += 16) {
+                            const wave = Math.sin(x * 0.007 + layer * 1.8 + (hash % 7)) * 48 +
+                                         Math.cos(x * 0.019 - layer * 1.1) * 22;
+                            ctx.lineTo(x, yBase + wave * (1 - layer * 0.1));
+                        }
+                        ctx.lineTo(width, height);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                }
+
+                // Ambient depth particles
+                for (let i = 0; i < 65; i++) {
+                    const px = Math.abs(Math.sin(i * 17.3 + hash)) * width;
+                    const py = Math.abs(Math.cos(i * 41.7 + hash)) * height * 0.88;
+                    const pr = 1 + (i % 3) * 0.8;
+                    ctx.fillStyle = 'rgba(255, 255, 255, ' + (0.2 + (i % 5) * 0.1).toFixed(2) + ')';
+                    ctx.beginPath();
+                    ctx.arc(px, py, pr, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Subtle film vignette
+            const vig = ctx.createRadialGradient(
+                width / 2, height / 2, Math.min(width, height) * 0.35,
+                width / 2, height / 2, Math.max(width, height) * 0.78
+            );
+            vig.addColorStop(0, 'transparent');
+            vig.addColorStop(1, 'rgba(0, 0, 0, 0.42)');
+            ctx.fillStyle = vig;
+            ctx.fillRect(0, 0, width, height);
+
+            return canvas.toDataURL('image/png');
+        }
+
+        // ==================== REAL VIDEO GENERATION ====================
+        async function generateVideo() {
+            if (appState.isVideoRendering) return;
+
+            const prompt = document.getElementById('prompt-video').value.trim();
+            if (appState.videoMode === 'text-to-video' && !prompt) {
+                showToast('Masukkan prompt deskripsi adegan video terlebih dahulu.', 'warning');
+                document.getElementById('prompt-video').focus();
+                return;
+            }
+            if (appState.videoMode === 'image-to-video' && !appState.videoI2VImage) {
+                showToast('Unggah gambar awal terlebih dahulu untuk mode Image to Video.', 'warning');
+                return;
+            }
+            if (appState.videoMode === 'multi-referensi' && appState.videoMultiRefs.length === 0) {
+                showToast('Unggah minimal 1 gambar referensi untuk mode Multi Referensi.', 'warning');
+                return;
+            }
+
+            const cost = getVideoCreditCost(appState.videoDuration, appState.videoResolution);
+            if (appState.credits < cost) {
+                showToast('Kredit tidak mencukupi (butuh ' + cost + ' Kredit). Silakan Top Up terlebih dahulu.', 'warning');
+                openTopupModal();
+                return;
+            }
+
+            // Deduct credits
+            appState.credits -= cost;
+            saveUserCredits();
+
+            appState.isVideoRendering = true;
+            const btn = document.getElementById('btn-generate-video');
+            btn.disabled = true;
+            btn.classList.add('opacity-60', 'cursor-not-allowed');
+
+            document.getElementById('stage-video-idle').classList.add('hidden');
+            document.getElementById('stage-video-result').classList.add('hidden');
+            document.getElementById('stage-video-loading').classList.remove('hidden');
+
+            const badge = document.getElementById('stage-video-status');
+            badge.textContent = 'Rendering...';
+            badge.className = 'font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 animate-pulse';
+
+            const dur = appState.videoDuration;
+            const res = appState.videoResolution;
+            const ratio = appState.videoRatio;
+
+            document.getElementById('render-video-spec').textContent = dur + ' Detik • ' + res + ' • ' + ratio;
+            document.getElementById('render-video-time').textContent = '0.0s / ' + dur.toFixed(1) + 's';
+            document.getElementById('render-video-bar').style.width = '4%';
+            document.getElementById('render-video-percent').textContent = '4%';
+            document.getElementById('render-video-stage-text').textContent = 'Menganalisis prompt & referensi...';
+
+            try {
+                let sourceUrls = [];
+                if (appState.videoMode === 'text-to-video') {
+                    const generatedFrame = renderProceduralArtwork({ prompt: prompt, resolution: res, ratio: ratio });
+                    sourceUrls = [generatedFrame];
+                } else if (appState.videoMode === 'image-to-video') {
+                    sourceUrls = [appState.videoI2VImage.dataUrl];
+                } else {
+                    sourceUrls = appState.videoMultiRefs.map(function(r) { return r.dataUrl; });
+                }
+
+                await new Promise(function(r) { setTimeout(r, 300); });
+                document.getElementById('render-video-stage-text').textContent = 'Menyusun komposisi frame Seedance 2.5...';
+
+                const loadedImages = await Promise.all(sourceUrls.map(loadHtmlImage));
+                await new Promise(function(r) { setTimeout(r, 250); });
+
+                document.getElementById('render-video-stage-text').textContent = 'Merender video HD...';
+
+                const videoBlobUrl = await encodeVideoStream({
+                    images: loadedImages,
+                    durationSec: dur,
+                    resolution: res,
+                    ratio: ratio,
+                    onProgress: function(fraction, elapsedSec) {
+                        const pct = Math.min(99, Math.round(10 + fraction * 90));
+                        document.getElementById('render-video-bar').style.width = pct + '%';
+                        document.getElementById('render-video-percent').textContent = pct + '%';
+                        document.getElementById('render-video-time').textContent = elapsedSec.toFixed(1) + 's / ' + dur.toFixed(1) + 's';
+                    }
+                });
+
+                const modeNames = {
+                    'text-to-video': 'Teks to Video',
+                    'image-to-video': 'Image to Video',
+                    'multi-referensi': 'Multi Referensi (' + sourceUrls.length + ' Gambar)'
+                };
+
+                const finalPrompt = prompt || modeNames[appState.videoMode];
+                const item = {
+                    id: 'vid-' + Date.now(),
+                    type: 'video',
+                    mode: modeNames[appState.videoMode],
+                    prompt: finalPrompt,
+                    duration: dur,
+                    resolution: res,
+                    ratio: ratio,
+                    url: videoBlobUrl,
+                    timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                };
+
+                appState.currentVideo = item;
+                appState.gallery.unshift(item);
+                updateGalleryBadge();
+
+                // Configure aspect ratio wrapper
+                const wrapper = document.getElementById('video-player-wrapper');
+                if (ratio === '9:16') {
+                    wrapper.className = 'w-full max-w-[260px] aspect-[9/16] mx-auto rounded-xl overflow-hidden bg-black border border-white/15 shadow-2xl flex items-center justify-center';
+                } else {
+                    wrapper.className = 'w-full aspect-video mx-auto rounded-xl overflow-hidden bg-black border border-white/15 shadow-2xl flex items-center justify-center';
+                }
+
+                const player = document.getElementById('video-output-player');
+                player.src = videoBlobUrl;
+                player.load();
+                player.play().catch(function() {});
+
+                document.getElementById('video-result-caption').textContent = finalPrompt;
+                document.getElementById('video-tag-mode').textContent = item.mode;
+                document.getElementById('video-tag-spec').textContent = dur + 'd • ' + res + ' • ' + ratio;
+
+                document.getElementById('stage-video-loading').classList.add('hidden');
+                document.getElementById('stage-video-result').classList.remove('hidden');
+
+                badge.textContent = 'Selesai';
+                badge.className = 'font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+
+                showToast('Video ' + dur + ' Detik (' + res + ') berhasil dirender!', 'success');
+            } catch (err) {
+                appState.credits += cost;
+                saveUserCredits();
+
+                document.getElementById('stage-video-loading').classList.add('hidden');
+                document.getElementById('stage-video-idle').classList.remove('hidden');
+                badge.textContent = 'Siap';
+                badge.className = 'font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.05] text-zinc-400 border border-white/10';
+
+                if (err && err.message === 'CANCELLED') {
+                    showToast('Render dibatalkan. ' + cost + ' Kredit dikembalikan.', 'info');
+                } else {
+                    showToast('Gagal merender video. Kredit Anda telah dikembalikan.', 'error');
+                }
+            } finally {
+                appState.isVideoRendering = false;
+                btn.disabled = false;
+                btn.classList.remove('opacity-60', 'cursor-not-allowed');
+            }
+        }
+
+        function encodeVideoStream(options) {
+            const images = options.images;
+            const durationSec = options.durationSec;
+            const resolution = options.resolution;
+            const ratio = options.ratio;
+            const onProgress = options.onProgress;
+
+            return new Promise(function(resolve, reject) {
+                const dims = getCanvasDimensions(resolution, ratio);
+                const width = dims.width;
+                const height = dims.height;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+
+                if (typeof canvas.captureStream !== 'function' || typeof MediaRecorder === 'undefined') {
+                    reject(new Error('MediaRecorder tidak didukung di browser ini'));
+                    return;
+                }
+
+                const stream = canvas.captureStream(30);
+                const candidates = [
+                    'video/webm;codecs=vp9',
+                    'video/webm;codecs=vp8',
+                    'video/webm',
+                    'video/mp4'
+                ];
+                let selectedMime = '';
+                for (let i = 0; i < candidates.length; i++) {
+                    if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(candidates[i])) {
+                        selectedMime = candidates[i];
+                        break;
+                    }
+                }
+
+                let recorder;
+                try {
+                    recorder = selectedMime
+                        ? new MediaRecorder(stream, { mimeType: selectedMime })
+                        : new MediaRecorder(stream);
+                } catch (e) {
+                    recorder = new MediaRecorder(stream);
+                }
+
+                appState.activeRecorder = recorder;
+                const chunks = [];
+                let cancelled = false;
+
+                recorder.ondataavailable = function(e) {
+                    if (e.data && e.data.size > 0) {
+                        chunks.push(e.data);
+                    }
+                };
+
+                recorder.onstop = function() {
+                    appState.activeRecorder = null;
+                    if (cancelled) {
+                        reject(new Error('CANCELLED'));
+                        return;
+                    }
+                    const blob = new Blob(chunks, { type: selectedMime || 'video/webm' });
+                    resolve(URL.createObjectURL(blob));
+                };
+
+                recorder.onerror = function(e) {
+                    clearInterval(timer);
+                    appState.activeRenderInterval = null;
+                    reject((e && e.error) || new Error('Recorder error'));
+                };
+
+                const particles = [];
+                for (let i = 0; i < 36; i++) {
+                    particles.push({
+                        x: ((i * 83) % 100) / 100 * width,
+                        y: ((i * 47) % 100) / 100 * height,
+                        r: 1 + (i % 3) * 0.75,
+                        vx: ((i % 7) - 3) * 4,
+                        vy: 10 + (i % 5) * 4,
+                        phase: i * 0.9
+                    });
+                }
+
+                function drawLayerFrame(img, t, progress, alpha) {
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    ctx.translate(width / 2, height / 2);
+
+                    const scale = 1.04 + 0.08 * progress;
+                    const tx = Math.sin(progress * Math.PI) * (width * 0.02);
+                    const ty = Math.cos(t * 0.35) * (height * 0.008);
+
+                    ctx.scale(scale, scale);
+                    ctx.translate(-width / 2 + tx, -height / 2 + ty);
+                    drawImageCover(ctx, img, width, height);
+                    ctx.restore();
+                }
+
+                function drawScene(t) {
+                    const progress = Math.min(1, t / durationSec);
+                    ctx.fillStyle = '#06070a';
+                    ctx.fillRect(0, 0, width, height);
+
+                    const count = images.length;
+                    const segDur = durationSec / count;
+                    const idx = Math.min(count - 1, Math.floor(t / segDur));
+                    const localT = t - idx * segDur;
+
+                    drawLayerFrame(images[idx], t, progress, 1.0);
+
+                    // Smooth crossfade between multi-reference images
+                    const fadeDur = Math.min(1.2, segDur * 0.28);
+                    if (count > 1 && idx < count - 1 && (segDur - localT) < fadeDur) {
+                        const alpha = 1 - ((segDur - localT) / fadeDur);
+                        drawLayerFrame(images[idx + 1], t, progress, alpha);
+                    }
+
+                    // Ambient lighting & floating depth particles
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'screen';
+                    const lx = width * (0.25 + 0.5 * Math.sin(t * 0.25));
+                    const light = ctx.createRadialGradient(lx, height * 0.12, 10, lx, height * 0.28, width * 0.85);
+                    light.addColorStop(0, 'rgba(99, 102, 241, 0.14)');
+                    light.addColorStop(0.5, 'rgba(6, 182, 212, 0.08)');
+                    light.addColorStop(1, 'transparent');
+                    ctx.fillStyle = light;
+                    ctx.fillRect(0, 0, width, height);
+
+                    for (let i = 0; i < particles.length; i++) {
+                        const p = particles[i];
+                        const px = (p.x + t * p.vx + width) % width;
+                        const py = (p.y - t * p.vy + height * 12) % height;
+                        const a = 0.22 + 0.3 * Math.sin(t * 2 + p.phase);
+                        ctx.fillStyle = 'rgba(255, 255, 255, ' + a.toFixed(3) + ')';
+                        ctx.beginPath();
+                        ctx.arc(px, py, p.r, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                }
+
+                drawScene(0);
+                recorder.start(250);
+
+                const t0 = performance.now();
+                const timer = setInterval(function() {
+                    if (!appState.isVideoRendering) {
+                        cancelled = true;
+                        clearInterval(timer);
+                        appState.activeRenderInterval = null;
+                        if (recorder.state !== 'inactive') recorder.stop();
+                        return;
+                    }
+                    const elapsed = (performance.now() - t0) / 1000;
+                    if (elapsed >= durationSec) {
+                        drawScene(durationSec);
+                        onProgress(1, durationSec);
+                        clearInterval(timer);
+                        appState.activeRenderInterval = null;
+                        if (recorder.state !== 'inactive') recorder.stop();
+                    } else {
+                        drawScene(elapsed);
+                        onProgress(elapsed / durationSec, elapsed);
+                    }
+                }, 1000 / 30);
+
+                appState.activeRenderInterval = timer;
+            });
+        }
+
+        function cancelVideoRender() {
+            appState.isVideoRendering = false;
+            if (appState.activeRenderInterval) {
+                clearInterval(appState.activeRenderInterval);
+                appState.activeRenderInterval = null;
+            }
+            if (appState.activeRecorder && appState.activeRecorder.state !== 'inactive') {
+                appState.activeRecorder.stop();
+            }
+        }
+
+        function downloadCurrentVideo() {
+            if (!appState.currentVideo) return;
+            const a = document.createElement('a');
+            a.href = appState.currentVideo.url;
+            a.download = 'JeckStudioAI-' + appState.currentVideo.duration + 's-' + appState.currentVideo.resolution + '.webm';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showToast('Mengunduh file video (.webm)...', 'success');
+        }
+
+        function saveCurrentVideoToGallery() {
+            if (!appState.currentVideo) return;
+            const exists = appState.gallery.some(function(item) {
+                return item.id === appState.currentVideo.id;
+            });
+            if (!exists) {
+                appState.gallery.unshift(appState.currentVideo);
+                updateGalleryBadge();
+            }
+            showToast('Video tersimpan di Galeri Karya!', 'success');
+        }
+
+        // ==================== REAL IMAGE GENERATION ====================
+        async function generateImage() {
+            if (appState.isImageRendering) return;
+
+            const prompt = document.getElementById('prompt-image').value.trim();
+            if (appState.imageMode === 'text-to-image' && !prompt) {
+                showToast('Masukkan prompt deskripsi gambar terlebih dahulu.', 'warning');
+                document.getElementById('prompt-image').focus();
+                return;
+            }
+            if (appState.imageMode === 'image-to-image' && appState.imageMultiRefs.length === 0) {
+                showToast('Unggah minimal 1 gambar referensi untuk mode Image to Image.', 'warning');
+                return;
+            }
+
+            const cost = 1;
+            if (appState.credits < cost) {
+                showToast('Kredit tidak mencukupi (butuh 1 Kredit). Silakan Top Up terlebih dahulu.', 'warning');
+                openTopupModal();
+                return;
+            }
+
+            appState.credits -= cost;
+            saveUserCredits();
+
+            appState.isImageRendering = true;
+            const btn = document.getElementById('btn-generate-image');
+            btn.disabled = true;
+            btn.classList.add('opacity-60', 'cursor-not-allowed');
+
+            document.getElementById('stage-image-idle').classList.add('hidden');
+            document.getElementById('stage-image-result').classList.add('hidden');
+            document.getElementById('stage-image-loading').classList.remove('hidden');
+
+            const badge = document.getElementById('stage-image-status');
+            badge.textContent = 'Rendering...';
+            badge.className = 'font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 animate-pulse';
+
+            try {
+                let refImgs = [];
+                if (appState.imageMode === 'image-to-image' && appState.imageMultiRefs.length > 0) {
+                    refImgs = await Promise.all(appState.imageMultiRefs.map(function(r) {
+                        return loadHtmlImage(r.dataUrl);
+                    }));
+                }
+
+                await new Promise(function(r) { setTimeout(r, 450); });
+
+                const effectivePrompt = prompt || ('Referensi ' + refImgs.length + ' Gambar (' + appState.imageRefStrength + '%)');
+                const pngDataUrl = renderProceduralArtwork({
+                    prompt: effectivePrompt,
+                    resolution: appState.imageResolution,
+                    ratio: appState.imageRatio,
+                    refImages: refImgs,
+                    strength: appState.imageRefStrength
+                });
+
+                const modeLabel = appState.imageMode === 'text-to-image'
+                    ? 'Teks to Image'
+                    : 'Image to Image (' + refImgs.length + ' Ref)';
+
+                const item = {
+                    id: 'img-' + Date.now(),
+                    type: 'image',
+                    mode: modeLabel,
+                    prompt: effectivePrompt,
+                    resolution: appState.imageResolution,
+                    ratio: appState.imageRatio,
+                    url: pngDataUrl,
+                    timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+                };
+
+                appState.currentImage = item;
+                appState.gallery.unshift(item);
+                updateGalleryBadge();
+
+                const wrapper = document.getElementById('image-player-wrapper');
+                if (appState.imageRatio === '9:16') {
+                    wrapper.className = 'w-full max-w-[260px] aspect-[9/16] mx-auto rounded-xl overflow-hidden bg-black border border-white/15 shadow-2xl flex items-center justify-center';
+                } else {
+                    wrapper.className = 'w-full aspect-video mx-auto rounded-xl overflow-hidden bg-black border border-white/15 shadow-2xl flex items-center justify-center';
+                }
+
+                document.getElementById('image-output-el').src = pngDataUrl;
+                document.getElementById('image-result-caption').textContent = effectivePrompt;
+                document.getElementById('image-tag-spec').textContent = appState.imageResolution + ' • ' + appState.imageRatio;
+
+                document.getElementById('stage-image-loading').classList.add('hidden');
+                document.getElementById('stage-image-result').classList.remove('hidden');
+
+                badge.textContent = 'Selesai';
+                badge.className = 'font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+
+                showToast('Gambar berhasil dibuat! (1 Kredit terpakai)', 'success');
+            } catch (err) {
+                appState.credits += cost;
+                saveUserCredits();
+                document.getElementById('stage-image-loading').classList.add('hidden');
+                document.getElementById('stage-image-idle').classList.remove('hidden');
+                badge.textContent = 'Siap';
+                badge.className = 'font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.05] text-zinc-400 border border-white/10';
+                showToast('Gagal merender gambar. Kredit telah dikembalikan.', 'error');
+            } finally {
+                appState.isImageRendering = false;
+                btn.disabled = false;
+                btn.classList.remove('opacity-60', 'cursor-not-allowed');
+            }
+        }
+
+        function downloadCurrentImage() {
+            if (!appState.currentImage) return;
+            const a = document.createElement('a');
+            a.href = appState.currentImage.url;
+            a.download = 'JeckStudioAI-' + appState.currentImage.resolution + '.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showToast('Mengunduh file gambar (.png)...', 'success');
+        }
+
+        function sendOutputImageToVideoStudio() {
+            if (!appState.currentImage) return;
+            transferImageToVideo(appState.currentImage.url, appState.currentImage.prompt, appState.currentImage.ratio);
+        }
+
+        function transferImageToVideo(dataUrl, prompt, ratio) {
+            switchMainTab('video');
+            setVideoMode('image-to-video');
+            if (ratio === '9:16' || ratio === '16:9') {
+                setVideoRatio(ratio);
+            }
+            setVideoI2VData(dataUrl, 'gambar-ai-studio.png');
+            document.getElementById('prompt-video').value = prompt;
+            updateVideoPromptCounter();
+            showToast('Gambar dipindahkan ke Video Studio (Image to Video)!', 'success');
+        }
+
+        // ==================== TOP-UP QRIS MODAL ====================
+        function openTopupModal() {
+            document.getElementById('modal-topup').classList.remove('hidden');
+        }
+
+        function closeTopupModal() {
+            document.getElementById('modal-topup').classList.add('hidden');
+        }
+
+        function selectTopupPackage(pkgKey) {
+            appState.selectedPackage = pkgKey;
+            const pkg = TOPUP_PACKAGES[pkgKey];
+            if (!pkg) return;
+
+            ['starter', 'kreator', 'pro'].forEach(function(key) {
+                const el = document.getElementById('pkg-' + key);
+                if (!el) return;
+                if (key === pkgKey) {
+                    el.className = 'text-left p-4 rounded-xl bg-indigo-500/10 border border-indigo-400/60 transition-all relative flex flex-col justify-between shadow-lg shadow-indigo-500/10 cursor-pointer';
+                } else {
+                    el.className = 'text-left p-4 rounded-xl bg-[#090b10] border border-white/10 hover:border-indigo-400/50 transition-all relative flex flex-col justify-between cursor-pointer';
+                }
+            });
+
+            document.getElementById('qris-amount-display').textContent = pkg.priceFormatted;
+            document.getElementById('qris-credits-display').textContent = '+' + pkg.credits + ' Kredit';
+            document.getElementById('qris-package-name').textContent = pkg.name + ' (' + pkg.unitFormatted + ')';
+
+            const waText = encodeURIComponent(
+                'Halo Admin Jeck.studioAI, saya telah melakukan pembayaran QRIS untuk ' +
+                pkg.name + ' (' + pkg.credits + ' Kredit - ' + pkg.priceFormatted + '). Berikut bukti pembayarannya:'
+            );
+            document.getElementById('qris-wa-btn').href = 'https://wa.me/6281234567890?text=' + waText;
+        }
+
+        function confirmSimulatedTopup() {
+            const pkg = TOPUP_PACKAGES[appState.selectedPackage];
+            if (!pkg) return;
+            appState.credits += pkg.credits;
+            saveUserCredits();
+            closeTopupModal();
+            showToast('Pembayaran dikonfirmasi! +' + pkg.credits + ' Kredit ditambahkan ke saldo Anda.', 'success');
+        }
+
+        function renderQrisSvg() {
+            const holder = document.getElementById('qris-svg-holder');
+            if (!holder) return;
+            const size = 25;
+            const cell = 144 / size;
+            let rects = '';
+
+            function isFinder(r, c, fr, fc) {
+                const dr = r - fr;
+                const dc = c - fc;
+                if (dr < 0 || dr > 6 || dc < 0 || dc > 6) return null;
+                if (dr === 0 || dr === 6 || dc === 0 || dc === 6) return true;
+                if (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4) return true;
+                return false;
+            }
+
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    const f1 = isFinder(r, c, 0, 0);
+                    const f2 = isFinder(r, c, 0, size - 7);
+                    const f3 = isFinder(r, c, size - 7, 0);
+                    let dark = false;
+
+                    if (f1 !== null) dark = f1;
+                    else if (f2 !== null) dark = f2;
+                    else if (f3 !== null) dark = f3;
+                    else if (r >= 10 && r <= 14 && c >= 10 && c <= 14) dark = false;
+                    else dark = ((r * 7 + c * 13 + (r ^ c)) % 3 === 0);
+
+                    if (dark) {
+                        rects += '<rect x="' + (c * cell).toFixed(2) + '" y="' + (r * cell).toFixed(2) + '" width="' + cell.toFixed(2) + '" height="' + cell.toFixed(2) + '" fill="#090b10"/>';
+                    }
+                }
+            }
+
+            holder.innerHTML =
+                '<svg viewBox="0 0 144 144" width="144" height="144" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">' +
+                '<rect width="144" height="144" fill="#ffffff"/>' +
+                rects +
+                '<rect x="57" y="57" width="30" height="30" rx="4" fill="#090b10"/>' +
+                '<text x="72" y="75" font-family="Inter, sans-serif" font-size="9" font-weight="800" fill="#ffffff" text-anchor="middle">JECK</text>' +
+                '</svg>';
+        }
+
+        // ==================== GALERI KARYA ====================
+        function updateGalleryBadge() {
+            const el = document.getElementById('nav-gallery-count');
+            if (el) el.textContent = String(appState.gallery.length);
+        }
+
+        function setGalleryFilter(filter) {
+            appState.galleryFilter = filter;
+            ['all', 'video', 'image'].forEach(function(f) {
+                const btn = document.getElementById('gfilter-' + f);
+                if (btn) btn.classList.toggle('pill-active', f === filter);
+            });
+            renderGallery();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderGallery() {
+            const grid = document.getElementById('gallery-grid');
+            if (!grid) return;
+
+            const items = appState.gallery.filter(function(item) {
+                if (appState.galleryFilter === 'all') return true;
+                return item.type === appState.galleryFilter;
+            });
+
+            grid.innerHTML = '';
+            if (items.length === 0) {
+                grid.innerHTML =
+                    '<div class="col-span-full studio-panel rounded-2xl p-12 text-center space-y-3">' +
+                    '<div class="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center mx-auto text-zinc-400">' +
+                    '<i class="fa-solid fa-photo-film"></i>' +
+                    '</div>' +
+                    '<h3 class="text-sm font-bold text-white">Belum Ada Karya</h3>' +
+                    '<p class="text-xs text-zinc-400 max-w-sm mx-auto">Hasil video dan gambar yang Anda buat akan muncul otomatis di sini.</p>' +
+                    '</div>';
+                return;
+            }
+
+            items.forEach(function(item) {
+                const isVideo = item.type === 'video';
+                const card = document.createElement('div');
+                card.className = 'studio-panel rounded-2xl overflow-hidden flex flex-col justify-between group hover:border-white/20 transition-all';
+
+                const previewHtml = isVideo
+                    ? '<video src="' + item.url + '" muted loop playsinline onmouseover="this.play().catch(function(){})" onmouseout="this.pause()" class="w-full h-full object-cover"></video>'
+                    : '<img src="' + item.url + '" alt="Karya AI" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">';
+
+                const actionHtml = !isVideo
+                    ? '<button type="button" onclick="transferGalleryImageToVideo(\'' + item.id + '\')" class="text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer">Jadikan Video</button>'
+                    : '';
+
+                card.innerHTML =
+                    '<div class="relative aspect-video bg-black overflow-hidden cursor-pointer" onclick="openLightbox(\'' + item.id + '\')">' +
+                        previewHtml +
+                        '<span class="absolute top-2.5 left-2.5 font-mono text-[10px] font-semibold px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-zinc-200 border border-white/10">' +
+                            (isVideo ? 'VIDEO' : 'GAMBAR') + ' • ' + item.ratio +
+                        '</span>' +
+                        '<span class="absolute top-2.5 right-2.5 font-mono text-[10px] px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-cyan-300 border border-white/10">' +
+                            item.resolution + (isVideo ? ' • ' + item.duration + 'd' : '') +
+                        '</span>' +
+                    '</div>' +
+                    '<div class="p-3.5 space-y-2.5">' +
+                        '<p class="text-xs text-zinc-200 line-clamp-2">' + escapeHtml(item.prompt) + '</p>' +
+                        '<div class="flex items-center justify-between pt-2 border-t border-white/[0.07] text-[11px] text-zinc-400">' +
+                            '<span>' + escapeHtml(item.mode) + '</span>' +
+                            '<div class="flex items-center gap-2">' +
+                                actionHtml +
+                                '<a href="' + item.url + '" download="JeckStudioAI-' + item.id + '.' + (isVideo ? 'webm' : 'png') + '" class="text-zinc-300 hover:text-white" title="Unduh">' +
+                                    '<i class="fa-solid fa-download"></i>' +
+                                '</a>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+
+                grid.appendChild(card);
+            });
+        }
+
+        function transferGalleryImageToVideo(itemId) {
+            const item = appState.gallery.find(function(i) { return i.id === itemId; });
+            if (!item || item.type !== 'image') return;
+            transferImageToVideo(item.url, item.prompt, item.ratio);
+        }
+
+        function openLightbox(itemId) {
+            const item = appState.gallery.find(function(i) { return i.id === itemId; });
+            if (!item) return;
+
+            const isVideo = item.type === 'video';
+            const stage = document.getElementById('lightbox-stage');
+            const cta = document.getElementById('lightbox-cta');
+
+            document.getElementById('lightbox-meta').textContent =
+                item.mode + ' • ' + item.ratio + ' • ' + item.resolution + (isVideo ? ' • ' + item.duration + ' Detik' : '');
+            document.getElementById('lightbox-caption').textContent = item.prompt;
+
+            if (isVideo) {
+                stage.innerHTML = '<video src="' + item.url + '" controls autoplay loop playsinline class="max-h-[62vh] w-auto rounded-xl"></video>';
+                cta.innerHTML = '<a href="' + item.url + '" download="JeckStudioAI-' + item.id + '.webm" class="px-4 py-2 rounded-xl cta-gradient text-white font-semibold text-xs flex items-center gap-1.5"><i class="fa-solid fa-download"></i> Unduh Video (.webm)</a>';
+            } else {
+                stage.innerHTML = '<img src="' + item.url + '" alt="Preview" class="max-h-[62vh] w-auto rounded-xl object-contain">';
+                cta.innerHTML =
+                    '<button type="button" onclick="closeLightbox(); transferGalleryImageToVideo(\'' + item.id + '\')" class="px-3.5 py-2 rounded-xl cta-gradient text-white font-semibold text-xs flex items-center gap-1.5"><i class="fa-solid fa-clapperboard"></i> Jadikan Video</button>' +
+                    '<a href="' + item.url + '" download="JeckStudioAI-' + item.id + '.png" class="px-3.5 py-2 rounded-xl bg-white/10 text-white font-semibold text-xs flex items-center gap-1.5"><i class="fa-solid fa-download"></i> Unduh PNG</a>';
+            }
+
+            document.getElementById('modal-lightbox').classList.remove('hidden');
+        }
+
+        function closeLightbox() {
+            document.getElementById('modal-lightbox').classList.add('hidden');
+            document.getElementById('lightbox-stage').innerHTML = '';
+        }
+
+        // ==================== TOAST NOTIFICATIONS ====================
+        function showToast(message, type) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const el = document.createElement('div');
+            const styles = {
+                success: 'bg-emerald-950/95 border-emerald-500/40 text-emerald-200',
+                warning: 'bg-amber-950/95 border-amber-500/40 text-amber-200',
+                error:   'bg-rose-950/95 border-rose-500/40 text-rose-200',
+                info:    'bg-[#131620]/95 border-indigo-400/40 text-zinc-100'
+            };
+            const icons = {
+                success: 'fa-circle-check text-emerald-400',
+                warning: 'fa-triangle-exclamation text-amber-400',
+                error:   'fa-circle-xmark text-rose-400',
+                info:    'fa-circle-info text-indigo-400'
+            };
+
+            const key = type && styles[type] ? type : 'info';
+            el.className = 'p-3.5 rounded-xl border backdrop-blur-xl shadow-2xl text-xs font-medium flex items-center gap-2.5 pointer-events-auto transition-all duration-300 translate-y-2 opacity-0 ' + styles[key];
+            el.innerHTML =
+                '<i class="fa-solid ' + icons[key] + ' text-sm shrink-0"></i>' +
+                '<span class="leading-snug">' + escapeHtml(message) + '</span>';
+
+            container.appendChild(el);
+            requestAnimationFrame(function() {
+                el.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(function() {
+                el.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(function() { el.remove(); }, 300);
+            }, 3400);
+        }
+    </script>
+</body>
+</html>
